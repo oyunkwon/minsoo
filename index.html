@@ -699,12 +699,28 @@
     function navigate(to) {
       if (transitioning || !STAGES[to]) return;
       transitioning = true;
-      imgEl.classList.add("is-fading");   // 페이드 아웃 (300ms ease-out)
+      imgEl.classList.add("is-fading");
       hotEl.innerHTML = "";
       setTimeout(() => {
-        render(to);
-        imgEl.classList.remove("is-fading"); // 페이드 인
-        transitioning = false;
+        const stage = STAGES[to];
+        const newImg = new Image();
+        newImg.onload = () => {
+          imgEl.src = stage.img;
+          imgEl.classList.remove("is-fading");
+          current = to;
+          stage.hotspots.forEach(h => {
+            const a = document.createElement("div");
+            a.className = "hotspot";
+            a.style.left   = h.x + "px";
+            a.style.top    = h.y + "px";
+            a.style.width  = h.w + "px";
+            a.style.height = h.h + "px";
+            a.addEventListener("click", () => navigate(h.to));
+            hotEl.appendChild(a);
+          });
+          transitioning = false;
+        };
+        newImg.src = stage.img;
       }, 300);
     }
 
