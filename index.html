@@ -157,7 +157,7 @@
       height: 600px;
       object-fit: cover;
       opacity: 1;
-      transition: opacity 300ms ease-out; /* Figma: EASE_OUT 300ms */
+      transition: opacity 200ms ease-out;
     }
 
     .stage-img.is-fading {
@@ -679,6 +679,14 @@
     let current = null;
     let transitioning = false;
 
+    /* 모든 스테이지 이미지 미리 로드 */
+    const imgCache = {};
+    Object.values(STAGES).forEach(s => {
+      const i = new Image();
+      i.src = s.img;
+      imgCache[s.img] = i;
+    });
+
     function render(name) {
       const stage = STAGES[name];
       current = name;
@@ -703,25 +711,21 @@
       hotEl.innerHTML = "";
       setTimeout(() => {
         const stage = STAGES[to];
-        const newImg = new Image();
-        newImg.onload = () => {
-          imgEl.src = stage.img;
-          imgEl.classList.remove("is-fading");
-          current = to;
-          stage.hotspots.forEach(h => {
-            const a = document.createElement("div");
-            a.className = "hotspot";
-            a.style.left   = h.x + "px";
-            a.style.top    = h.y + "px";
-            a.style.width  = h.w + "px";
-            a.style.height = h.h + "px";
-            a.addEventListener("click", () => navigate(h.to));
-            hotEl.appendChild(a);
-          });
-          transitioning = false;
-        };
-        newImg.src = stage.img;
-      }, 300);
+        imgEl.src = stage.img;
+        imgEl.classList.remove("is-fading");
+        current = to;
+        stage.hotspots.forEach(h => {
+          const a = document.createElement("div");
+          a.className = "hotspot";
+          a.style.left   = h.x + "px";
+          a.style.top    = h.y + "px";
+          a.style.width  = h.w + "px";
+          a.style.height = h.h + "px";
+          a.addEventListener("click", () => navigate(h.to));
+          hotEl.appendChild(a);
+        });
+        transitioning = false;
+      }, 200);
     }
 
     render(START);
