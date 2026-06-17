@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>민수 게임 아카이브</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --text-primary: #FFFFFF;
+      --bg-secondary: #292929;
+      --border-secondary: #121212;
+      --text-secondary: #CCB09D;
+      --border-primary: #CCB09D;
+      --bg-primary: #1E1F21;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: var(--bg-primary);
+      overflow-x: hidden; /* 가로 스크롤 방지 */
+    }
+
+    /* 와이어프레임_오토레이아웃ver (0:10) */
+    .ver {
+      background: var(--bg-primary);
+      position: relative;
+      width: 100%; /* 브라우저 너비에 맞춤 (기존 1920px 고정 → 100%) */
+    }
+
+    /* container (0:11) */
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 208px;
+      align-items: center;
+      width: 100%; /* 브라우저 너비에 맞춤 (기존 1920px 고정 → 100%) */
+    }
+
+    /* container__top (0:12) */
+    .container__top {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* header (0:13) */
+    .header {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-secondary);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center; /* 내부 래퍼를 중앙 정렬 → 콘텐츠와 동일 좌측선 */
+      padding: 23px 0;
+      width: 100%;
+    }
+
+    /* header 내부 래퍼: game-content와 동일한 1200.002px 폭으로 좌측선 정렬 */
+    .header__inner {
+      width: 1200.002px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    /* header__title (0:14) */
+    .header__title {
+      font-weight: 600; /* Pretendard SemiBold */
+      line-height: 1.2;
+      font-size: 28px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    /* game-content (0:15) */
+    .game-content {
+      display: flex;
+      flex-direction: column;
+      gap: 112px;
+      align-items: center;
+    }
+
+    /* game-content__header (0:16) */
+    .game-content__header {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: flex-start;
+      width: 1200.002px;
+    }
+
+    /* game-title-group (0:17) */
+    .game-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+      line-height: 1.2;
+      width: 210px;
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    /* game-category (0:18) */
+    .game-category {
+      font-weight: 300; /* Pretendard Light */
+      font-size: 20px;
+      color: var(--text-primary);
+    }
+
+    /* game-title (0:19) */
+    .game-title {
+      font-weight: 400; /* Pretendard Regular */
+      font-size: 32px;
+      color: var(--text-secondary);
+    }
+
+    /* game-line (0:20) */
+    .game-line {
+      height: 0;
+      width: 100%;
+      border-top: 1px solid var(--text-secondary);
+    }
+
+    /* game-content__screen-zone (0:21) */
+    .game-content__screen-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-left: 200px;
+      padding-right: 200px;
+    }
+
+    /* game-screen (0:22) → 스테이지 뷰어 */
+    .game-screen {
+      background: #d9d9d9;
+      height: 600px;
+      width: 800px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stage-img {
+      position: absolute;
+      inset: 0;
+      width: 800px;
+      height: 600px;
+      object-fit: cover;
+      opacity: 1;
+      transition: opacity 300ms ease-out; /* Figma: EASE_OUT 300ms */
+    }
+
+    .stage-img.is-fading {
+      opacity: 0;
+    }
+
+    /* 프로토타입 핫스팟 (좌표는 800×600 프레임 기준) */
+    .hotspot {
+      position: absolute;
+      cursor: pointer;
+      background: transparent;
+      z-index: 2;
+    }
+
+    /* game-info (0:23) */
+    .game-info {
+      display: flex;
+      flex-direction: column;
+      gap: 208px;
+      align-items: center;
+      justify-content: center;
+      width: 1200.002px;
+    }
+
+    /* game-info__container (0:24) */
+    .game-info__container {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      align-items: center;
+      padding-left: 237.5px;
+      padding-right: 237.5px;
+      width: 100%;
+    }
+
+    /* game-info__title (0:25) */
+    .game-info__title {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* game-info__title-text (0:26) */
+    .game-info__title-text {
+      font-weight: 600; /* Pretendard SemiBold */
+      line-height: 1.2;
+      font-size: 24px;
+      text-align: center;
+      color: var(--text-primary);
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    /* game-info__title-border (0:27) */
+    .game-info__title-border {
+      height: 0;
+      width: 100%;
+      border-top: 1px solid var(--border-primary);
+    }
+
+    /* game-info__content (0:28) */
+    .game-info__content {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      align-items: center;
+      width: 725px;
+    }
+
+    /* game-info__intro (0:29) */
+    .game-info__intro {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .game-info__intro-text {
+      font-weight: 300; /* Pretendard Light */
+      line-height: 1.2;
+      font-size: 20px;
+      text-align: center;
+      color: var(--text-primary);
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    /* game-info__section--howto (0:31) */
+    .game-info__section--howto {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      text-align: center;
+      color: var(--text-primary);
+      width: 100%;
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    .game-info__section-title {
+      font-weight: 600; /* Pretendard SemiBold */
+      line-height: 1.2;
+    }
+
+    .game-info__section-desc {
+      font-weight: 300; /* Pretendard Light */
+    }
+
+    .game-info__section-desc p {
+      line-height: 1.2;
+    }
+
+    /* game-info__section--control (0:34) */
+    .game-info__section--control {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.2;
+      font-size: 20px;
+      text-align: center;
+      color: var(--text-primary);
+      width: 126px;
+    }
+
+    .game-info__section--control .game-info__section-title {
+      white-space: nowrap;
+    }
+
+    .game-info__section--control .game-info__section-desc {
+      width: 126px;
+    }
+
+    /* ad-section (0:37) → 배너 캐러셀 */
+    .ad-section {
+      background: #d9d9d9;
+      height: 400px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ad-section__slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 600ms ease-out;
+    }
+
+    .ad-section__slide.is-active {
+      opacity: 1;
+    }
+
+    /* comment-section (0:38) */
+    .comment-section {
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+      align-items: flex-start;
+      justify-content: flex-end;
+      width: 1200.002px;
+    }
+
+    /* comment-section__form (0:39) */
+    .comment-section__form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    /* comment-section__form-name (0:40) */
+    .comment-section__form-name {
+      border: 1px solid var(--border-primary);
+      display: flex;
+      height: 48px;
+      align-items: center;
+      padding: 12px 149px 12px 20px;
+      width: 204px;
+    }
+
+    .comment-section__form-name-text {
+      font-weight: 600; /* Pretendard SemiBold */
+      line-height: 1.2;
+      font-size: 20px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    /* comment-section__form-text (0:42) */
+    .comment-section__form-text {
+      border: 1px solid var(--border-primary);
+      display: flex;
+      height: 160px;
+      align-items: flex-start; /* 좌상단 정렬: 우측 필러 908px 제거 대응 */
+      padding: 12px 20px;
+      width: 100%;
+    }
+
+    .comment-section__form-placeholder {
+      font-weight: 300; /* Pretendard Light */
+      line-height: 1.2;
+      font-size: 20px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      word-break: break-word;
+    }
+
+    /* comment-section__list (0:44) */
+    .comment-section__list {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    /* comment-section__item (0:45) */
+    .comment-section__item {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    /* comment-section__avatar mask group (0:46) */
+    .comment-section__avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .comment-section__avatar img {
+      position: absolute;
+      object-fit: cover;
+      max-width: none;
+      pointer-events: none;
+    }
+
+    /* avatar img 1 (0:48): 139x133, offset -31,-30 */
+    .comment-section__avatar-img--1 {
+      width: 139px;
+      height: 133px;
+      left: -31px;
+      top: -30px;
+    }
+
+    /* avatar img 2 (0:56): 84x112, offset -1,-12 */
+    .comment-section__avatar-img--2 {
+      width: 84px;
+      height: 112px;
+      left: -1px;
+      top: -12px;
+    }
+
+    /* avatar img 3 (0:64): 92x122, offset -9,-9 */
+    .comment-section__avatar-img--3 {
+      width: 92px;
+      height: 122px;
+      left: -9px;
+      top: -9px;
+    }
+
+    /* comment-section__content (0:49) */
+    .comment-section__content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+      line-height: 1.2;
+      font-size: 20px;
+      color: var(--text-primary);
+      width: 205px;
+      word-break: break-word;
+    }
+
+    .comment-section__user-name {
+      font-weight: 600; /* Pretendard SemiBold */
+    }
+
+    .comment-section__user-text {
+      font-weight: 300; /* Pretendard Light */
+      width: 205px;
+    }
+
+    /* comment-section__item variants 2,3 use nowrap and shrink content width */
+    .comment-section__content--2 {
+      width: 205px;
+      white-space: nowrap;
+    }
+
+    .comment-section__content--2 .comment-section__user-text {
+      width: auto;
+    }
+
+    .comment-section__content--3 {
+      width: 35px;
+      white-space: nowrap;
+    }
+
+    .comment-section__content--3 .comment-section__user-text {
+      width: auto;
+    }
+
+    /* comment-section__border (0:52, 0:60) */
+    .comment-section__border {
+      height: 0;
+      width: 100%;
+      border-top: 2px solid var(--border-secondary);
+    }
+
+    /* footer (0:68) */
+    .footer {
+      background: var(--bg-secondary);
+      display: flex;
+      height: 60px;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 0; /* 좌우 필러 764px 제거 → 중앙정렬 유지 */
+      width: 100%;
+    }
+
+    .footer__copyright {
+      font-weight: 300; /* Pretendard Light */
+      line-height: 1.2;
+      font-size: 20px;
+      text-align: center;
+      color: var(--text-primary);
+      white-space: nowrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="ver" data-node-id="0:10">
+    <div class="container" data-node-id="0:11">
+      <!-- container__top -->
+      <div class="container__top" data-node-id="0:12">
+        <!-- header -->
+        <header class="header" data-node-id="0:13">
+          <div class="header__inner">
+            <p class="header__title" data-node-id="0:14">민수 게임 아카이브</p>
+          </div>
+        </header>
+        <!-- game-content -->
+        <div class="game-content" data-node-id="0:15">
+          <div class="game-content__header" data-node-id="0:16">
+            <div class="game-title-group" data-node-id="0:17">
+              <p class="game-category" data-node-id="0:18">자작플래시</p>
+              <p class="game-title" data-node-id="0:19">민수의 외출 준비</p>
+            </div>
+            <div class="game-line" data-node-id="0:20"></div>
+          </div>
+          <div class="game-content__screen-zone" data-node-id="0:21">
+            <div class="game-screen" data-node-id="0:22" id="gameScreen">
+              <img class="stage-img" id="stageImg" src="stages/thumbnail.png" alt="" />
+              <div id="hotspots"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- game-info -->
+      <div class="game-info" data-node-id="0:23">
+        <div class="game-info__container" data-node-id="0:24">
+          <div class="game-info__title" data-node-id="0:25">
+            <p class="game-info__title-text" data-node-id="0:26">민수의 외출 준비</p>
+            <div class="game-info__title-border" data-node-id="0:27"></div>
+          </div>
+          <div class="game-info__content" data-node-id="0:28">
+            <div class="game-info__intro" data-node-id="0:29">
+              <p class="game-info__intro-text" data-node-id="0:30">데스크탑에서 즐길 수 있는 자작플래시 겜입니다.</p>
+            </div>
+            <div class="game-info__section--howto" data-node-id="0:31">
+              <p class="game-info__section-title" data-node-id="0:32">게임 방법</p>
+              <div class="game-info__section-desc" data-node-id="0:33">
+                <p>민수의 생일을 맞아 누구나 쉽고 가볍게 즐길 수 있도록 만든 세상에 하나뿐인 자작 게임입니다.</p>
+                <p>마음대로 자유롭게 플레이해주시면 됩니다.</p>
+                <p>재밌게 플레이하세요!</p>
+              </div>
+            </div>
+            <div class="game-info__section--control" data-node-id="0:34">
+              <p class="game-info__section-title" data-node-id="0:35">조작 방법</p>
+              <p class="game-info__section-desc" data-node-id="0:36">마우스와 키보드</p>
+            </div>
+          </div>
+        </div>
+        <div class="ad-section" data-node-id="0:37" id="adSection">
+          <img class="ad-section__slide is-active" src="banners/banner-1.png" alt="" />
+          <img class="ad-section__slide" src="banners/banner-2.png" alt="" />
+          <img class="ad-section__slide" src="banners/banner-3.png" alt="" />
+        </div>
+      </div>
+
+      <!-- comment-section -->
+      <div class="comment-section" data-node-id="0:38">
+        <div class="comment-section__form" data-node-id="0:39">
+          <div class="comment-section__form-name" data-node-id="0:40">
+            <p class="comment-section__form-name-text" data-node-id="0:41">이름</p>
+          </div>
+          <div class="comment-section__form-text" data-node-id="0:42">
+            <p class="comment-section__form-placeholder" data-node-id="0:43">현재 댓글을 작성 하실 수 없습니다.</p>
+          </div>
+        </div>
+        <div class="comment-section__list" data-node-id="0:44">
+          <!-- item 1 -->
+          <div class="comment-section__item" data-node-id="0:45">
+            <div class="comment-section__avatar" data-node-id="0:46">
+              <img class="comment-section__avatar-img--1" src="asset/0ff3dcedddc882755ef1494a3bca1c8aa5afba8a.png" alt="" />
+            </div>
+            <div class="comment-section__content" data-node-id="0:49">
+              <p class="comment-section__user-name" data-node-id="0:50">익명</p>
+              <p class="comment-section__user-text" data-node-id="0:51">이것 완전히 야르네요 ㅋㅋ</p>
+            </div>
+          </div>
+          <div class="comment-section__border" data-node-id="0:52"></div>
+          <!-- item 2 -->
+          <div class="comment-section__item" data-node-id="0:53">
+            <div class="comment-section__avatar" data-node-id="0:54">
+              <img class="comment-section__avatar-img--2" src="asset/19cca1adaee90dbe5ac0712f4ba506fa4227de45.png" alt="" />
+            </div>
+            <div class="comment-section__content comment-section__content--2" data-node-id="0:57">
+              <p class="comment-section__user-name" data-node-id="0:58">익명</p>
+              <p class="comment-section__user-text" data-node-id="0:59">한양초 다니는 최민수 바보</p>
+            </div>
+          </div>
+          <div class="comment-section__border" data-node-id="0:60"></div>
+          <!-- item 3 -->
+          <div class="comment-section__item" data-node-id="0:61">
+            <div class="comment-section__avatar" data-node-id="0:62">
+              <img class="comment-section__avatar-img--3" src="asset/f9fee3f0beec90336947f1ae05c42a6cc0f21ce5.png" alt="" />
+            </div>
+            <div class="comment-section__content comment-section__content--3" data-node-id="0:65">
+              <p class="comment-section__user-name" data-node-id="0:66">익명</p>
+              <p class="comment-section__user-text" data-node-id="0:67">똥</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- footer -->
+      <footer class="footer" data-node-id="0:68">
+        <p class="footer__copyright" data-node-id="0:69">Copyright ⓒ 2026. 민사사 All rights reserved.</p>
+      </footer>
+    </div>
+  </div>
+
+  <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
+  <button id="bgmToggle" style="
+    position:fixed;bottom:24px;right:24px;z-index:999;
+    width:48px;height:48px;border-radius:50%;border:1px solid var(--border-primary);
+    background:var(--bg-secondary);color:var(--text-primary);cursor:pointer;
+    font-size:20px;display:flex;align-items:center;justify-content:center;
+  " title="배경음악 켜기/끄기">🔇</button>
+
+  <script>
+    /* 배경음악 */
+    (function(){
+      const audio = document.getElementById('bgm');
+      const btn = document.getElementById('bgmToggle');
+      let playing = false;
+      btn.onclick = () => {
+        if (playing) { audio.pause(); btn.textContent = '🔇'; }
+        else { audio.play().catch(()=>{}); btn.textContent = '🔊'; }
+        playing = !playing;
+      };
+    })();
+
+    /* Figma 프로토타입 흐름 (REST API에서 추출)
+       각 스테이지: 이미지 + 핫스팟 목록 (좌표는 800×600 프레임 기준)
+       전환: ON_CLICK → NAVIGATE, EASE_OUT 300ms */
+    const STAGES = {
+      "thumbnail":    { img: "stages/thumbnail.png",    hotspots: [ { x:524, y:458, w:231, h:53, to:"house-stage" } ] },
+      "house-stage":  { img: "stages/house-stage.png",  hotspots: [ { x:536, y:173, w:24,  h:24, to:"subway-stage" } ] },
+      "subway-stage": { img: "stages/subway-stage.png", hotspots: [ { x:536, y:173, w:24,  h:24, to:"rjsdk-stage" } ] },
+      "rjsdk-stage":  { img: "stages/rjsdk-stage.png",  hotspots: [ { x:474, y:173, w:24,  h:24, to:"help-stage" } ] },
+      "help-stage":   { img: "stages/help-stage.png",   hotspots: [ { x:536, y:173, w:24,  h:24, to:"quiz-stage" } ] },
+      "quiz-stage":   { img: "stages/quiz-stage.png",   hotspots: [
+                          { x:127, y:174, w:184, h:52, to:"end-stage" },  /* YES */
+                          { x:331, y:174, w:184, h:52, to:"end-stage" }   /* NO  */
+                        ] },
+      "end-stage":    { img: "stages/end-stage.png",    hotspots: [ { x:474, y:173, w:24,  h:24, to:"letter" } ] },
+      "letter":       { img: "stages/letter.png",       hotspots: [ { x:676, y:476, w:44,  h:44, to:"letter-park" } ] },
+      "letter-park":  { img: "stages/letter-park.png",  hotspots: [
+                          { x:80,  y:476, w:44, h:44, to:"letter" },
+                          { x:676, y:476, w:44, h:44, to:"letter-song" } ] },
+      "letter-song":  { img: "stages/letter-song.png",  hotspots: [
+                          { x:80,  y:476, w:44, h:44, to:"letter-park" },
+                          { x:676, y:476, w:44, h:44, to:"letter-shin" } ] },
+      "letter-shin":  { img: "stages/letter-shin.png",  hotspots: [
+                          { x:80,  y:476, w:44, h:44, to:"letter-song" },
+                          { x:676, y:476, w:44, h:44, to:"letter-choi" } ] },
+      "letter-choi":  { img: "stages/letter-choi.png",  hotspots: [
+                          { x:80,  y:476, w:44, h:44, to:"letter-shin" },
+                          { x:676, y:476, w:44, h:44, to:"letter-al" } ] },
+      "letter-al":    { img: "stages/letter-al.png",    hotspots: [
+                          { x:80,  y:476, w:44, h:44, to:"letter-choi" },
+                          { x:676, y:476, w:44, h:44, to:"letter-kim" } ] },
+      "letter-kim":   { img: "stages/letter-kim.png",   hotspots: [
+                          { x:80,  y:476, w:44, h:44, to:"letter-al" } ] }
+    };
+
+    const START = "thumbnail";
+    const imgEl = document.getElementById("stageImg");
+    const hotEl = document.getElementById("hotspots");
+    let current = null;
+    let transitioning = false;
+
+    function render(name) {
+      const stage = STAGES[name];
+      current = name;
+      imgEl.src = stage.img;
+      hotEl.innerHTML = "";
+      stage.hotspots.forEach(h => {
+        const a = document.createElement("div");
+        a.className = "hotspot";
+        a.style.left   = h.x + "px";
+        a.style.top    = h.y + "px";
+        a.style.width  = h.w + "px";
+        a.style.height = h.h + "px";
+        a.addEventListener("click", () => navigate(h.to));
+        hotEl.appendChild(a);
+      });
+    }
+
+    function navigate(to) {
+      if (transitioning || !STAGES[to]) return;
+      transitioning = true;
+      imgEl.classList.add("is-fading");   // 페이드 아웃 (300ms ease-out)
+      hotEl.innerHTML = "";
+      setTimeout(() => {
+        render(to);
+        imgEl.classList.remove("is-fading"); // 페이드 인
+        transitioning = false;
+      }, 300);
+    }
+
+    render(START);
+
+    /* 광고 배너 캐러셀: 각 5초씩 표시 후 다음으로, 무한 루프 */
+    (function () {
+      const slides = document.querySelectorAll("#adSection .ad-section__slide");
+      if (slides.length <= 1) return;
+      let idx = 0;
+      setInterval(() => {
+        slides[idx].classList.remove("is-active");
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add("is-active");
+      }, 5000);
+    })();
+  </script>
+</body>
+</html>
